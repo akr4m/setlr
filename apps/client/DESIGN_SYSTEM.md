@@ -25,6 +25,7 @@ The overlapping circles and wordmark in `public/brand/` were extracted from the 
 - A 4px spacing rhythm: controls and rows use 8–16px; cards use 20–32px; page sections use 20–28px.
 - Desktop: 224px sidebar, 72px header, bounded content width, split primary/secondary columns.
 - Below 1024px: compact header, drawer navigation, five-item bottom navigation. Grids collapse to one column before their contents become cramped.
+- Mobile navigation uses a 76px floating dock, inset 12px plus the bottom safe area, with a 520px maximum width. Blue icon capsules identify the active section; More includes every secondary destination. Press and selection feedback use the shared motion tokens, with reduced-motion support. Content reserves the dock height plus 24px of scroll clearance.
 - Phone home prioritizes balance, five quick actions, and activity. Transaction lists show date and status in tappable rows.
 - Mobile form text is 16px. Header controls are at least 44px, and content spacing accounts for safe areas. Payment flows use a focused view with totals next to the primary action.
 - Navigation uses a Base UI modal drawer with keyboard focus management. Dialogs become bottom sheets on small screens. Mobile action buttons have a minimum 44px height. Reduced motion is respected.

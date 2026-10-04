@@ -27,6 +27,8 @@ import { FeaturePage } from './features'
 import { AuthPage, authPages } from './auth'
 import { cn } from '#/lib/utils'
 
+const mobileNav = ['dashboard', 'wallet', 'payments', 'cards']
+
 export function FintechApp({ page = 'dashboard' }: { page?: string }) {
   const [menu, setMenu] = useState(false)
   const [more, setMore] = useState(false)
@@ -61,6 +63,7 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
       : page === 'virtual-cards'
         ? 'cards'
         : page
+  const mobileActive = mobileNav.includes(active) ? active : 'more'
   if (authPages.includes(page)) return <AuthPage page={page} />
   const info = pageInfo[active] || pageInfo.dashboard!
   const navLink = (key: string) => {
@@ -298,32 +301,54 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
       {!paymentModes[page] && (
         <nav
           aria-label="Mobile navigation"
-          className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-20 flex justify-around border-t bg-card px-2 pt-2 pb-[max(8px,env(safe-area-inset-bottom))] lg:hidden"
+          className="mobile-bottom-nav fixed z-20 grid grid-cols-5 lg:hidden"
         >
-          {['dashboard', 'wallet', 'payments', 'cards'].map((key) => {
+          {mobileNav.map((key) => {
             const item = pageInfo[key]!
+            const selected = mobileActive === key
             return (
               <AppLink
                 page={key}
                 key={key}
-                className={cn(
-                  'mobile-nav-item flex min-h-12 min-w-14 flex-col items-center justify-center gap-1 text-[11px]',
-                  active === key
-                    ? 'is-active text-primary'
-                    : 'text-muted-foreground',
-                )}
+                ariaCurrent={
+                  selected ? (page === key ? 'page' : 'location') : undefined
+                }
+                className={cn('mobile-nav-item', selected && 'is-active')}
               >
-                <item.icon className="size-5" />
-                <span>{key === 'dashboard' ? 'Home' : item.title}</span>
+                <span className="mobile-nav-icon">
+                  <item.icon
+                    className="size-[22px]"
+                    strokeWidth={selected ? 2 : 1.8}
+                  />
+                </span>
+                <span className="mobile-nav-label">
+                  {key === 'dashboard'
+                    ? 'Home'
+                    : key === 'wallet'
+                      ? 'Wallet'
+                      : item.title}
+                </span>
               </AppLink>
             )
           })}
           <button
+            type="button"
             onClick={() => setMore(true)}
-            className="mobile-nav-item flex min-h-12 min-w-14 flex-col items-center justify-center gap-1 text-[11px] text-muted-foreground"
+            aria-haspopup="dialog"
+            aria-expanded={more}
+            aria-current={mobileActive === 'more' ? 'location' : undefined}
+            className={cn(
+              'mobile-nav-item',
+              (mobileActive === 'more' || more) && 'is-active',
+            )}
           >
-            <MoreHorizontal className="size-5" />
-            More
+            <span className="mobile-nav-icon">
+              <MoreHorizontal
+                className="size-[22px]"
+                strokeWidth={mobileActive === 'more' || more ? 2 : 1.8}
+              />
+            </span>
+            <span className="mobile-nav-label">More</span>
           </button>
         </nav>
       )}
@@ -336,14 +361,25 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
             Everything you need to manage and grow your money.
           </DialogDescription>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {extraNav.map((key) => {
+            {(mobile
+              ? [
+                  ...mainNav.filter((key) => !mobileNav.includes(key)),
+                  ...growNav,
+                  ...extraNav,
+                ]
+              : extraNav
+            ).map((key) => {
               const item = pageInfo[key]!
               return (
                 <AppLink
                   key={key}
                   page={key}
                   onClick={() => setMore(false)}
-                  className="flex items-center gap-3 rounded-lg p-3 hover:bg-secondary"
+                  ariaCurrent={page === key ? 'page' : undefined}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg p-3 hover:bg-secondary',
+                    page === key && 'bg-secondary text-primary',
+                  )}
                 >
                   <span className="icon-tile">
                     <item.icon className="size-5" />

@@ -243,16 +243,24 @@ export function AppLink({
   className,
   onClick,
   label,
+  ariaCurrent,
 }: {
   page: string
   children: ReactNode
   className?: string
   onClick?: () => void
   label?: string
+  ariaCurrent?: ComponentProps<'a'>['aria-current']
 }) {
   const link =
     page === 'dashboard' ? (
-      <Link to="/" className={className} onClick={onClick} aria-label={label} />
+      <Link
+        to="/"
+        className={className}
+        onClick={onClick}
+        aria-label={label}
+        aria-current={ariaCurrent}
+      />
     ) : (
       <Link
         to="/$page"
@@ -260,6 +268,7 @@ export function AppLink({
         className={className}
         onClick={onClick}
         aria-label={label}
+        aria-current={ariaCurrent}
       />
     )
   if (isValidElement(children) && children.type === Button) {
