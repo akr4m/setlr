@@ -1,12 +1,12 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { routeTree } from './routeTree.gen'
-import { prefersReducedMotion, routeViewTransition } from './lib/motion'
+import { getRouteViewTransition } from './lib/motion'
 
 export function getRouter() {
   return createTanStackRouter({
     routeTree,
     scrollRestoration: true,
-    defaultViewTransition: prefersReducedMotion() ? false : routeViewTransition,
+    defaultViewTransition: getRouteViewTransition(),
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
   })

@@ -41,7 +41,7 @@ import {
 import { Switch } from '#/components/ui/switch'
 import { cn } from '#/lib/utils'
 import { downloadReceipt } from '#/lib/demo-export'
-import { prefersReducedMotion, routeViewTransition } from '#/lib/motion'
+import { getRouteViewTransition } from '#/lib/motion'
 import {
   initialGoals,
   initialNotices,
@@ -143,15 +143,18 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.motion = reducedMotion ? 'reduced' : 'full'
     localStorage.setItem('setlr-reduced-motion', String(reducedMotion))
     const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const viewport = window.matchMedia('(max-width: 1023px)')
     const update = () =>
       router.update({
-        defaultViewTransition: prefersReducedMotion()
-          ? false
-          : routeViewTransition,
+        defaultViewTransition: getRouteViewTransition(),
       })
     update()
     preference.addEventListener('change', update)
-    return () => preference.removeEventListener('change', update)
+    viewport.addEventListener('change', update)
+    return () => {
+      preference.removeEventListener('change', update)
+      viewport.removeEventListener('change', update)
+    }
   }, [reducedMotion, router])
   useEffect(
     () => () => {

@@ -22,6 +22,14 @@ export const routeViewTransition: Exclude<
   },
 }
 
+// Keep the fixed mobile navigation live while page content animates separately.
+export function getRouteViewTransition() {
+  return prefersReducedMotion() ||
+    window.matchMedia('(max-width: 1023px)').matches
+    ? false
+    : routeViewTransition
+}
+
 // Local steps share the router's snapshot mechanism, without delaying input.
 export function transitionStep(update: () => void, backward = false) {
   if (

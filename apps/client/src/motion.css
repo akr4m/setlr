@@ -57,6 +57,13 @@ html {
 :root[data-view-transitions='supported'] .page-enter {
   animation: none;
 }
+/* Mobile pages animate in the live DOM so snapshots cannot cover the dock. */
+@media (max-width: 1023px) {
+  :root[data-view-transitions='supported'] .page-enter,
+  .auth-workspace > div {
+    animation: content-enter var(--duration-route) var(--ease-enter) both;
+  }
+}
 .payment-stage > div {
   animation: content-enter var(--duration-normal) var(--ease-enter) both;
 }
@@ -112,7 +119,6 @@ html {
 }
 .sidebar-indicator,
 .mobile-indicator {
-  z-index: 0;
   position: absolute;
   top: 0;
   left: 0;
@@ -134,6 +140,7 @@ html {
   background: var(--secondary);
 }
 .mobile-indicator {
+  z-index: 0;
   border-radius: 12px;
   background: var(--primary);
   box-shadow: 0 2px 6px color-mix(in srgb, var(--primary) 24%, transparent);
@@ -321,7 +328,7 @@ html {
 }
 :root[data-motion='reduced'] .nav-item:hover > svg,
 :root[data-motion='reduced'] .quick-action:hover .icon-tile,
-:root[data-motion='reduced'] .mobile-nav-item:active .mobile-nav-icon {
+:root[data-motion='reduced'] .mobile-nav-item:active .mobile-nav-icon > svg {
   transform: none;
 }
 :root[data-motion='reduced'] [data-slot='button']:active {
@@ -340,7 +347,7 @@ html {
   }
   .nav-item:hover > svg,
   .quick-action:hover .icon-tile,
-  .mobile-nav-item:active .mobile-nav-icon {
+  .mobile-nav-item:active .mobile-nav-icon > svg {
     transform: none;
   }
   [data-slot='button']:active {

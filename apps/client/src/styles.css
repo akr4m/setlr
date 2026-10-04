@@ -459,8 +459,10 @@
   transition:
     background-color var(--duration-normal),
     color var(--duration-fast),
-    box-shadow var(--duration-normal),
-    transform var(--duration-fast);
+    box-shadow var(--duration-normal);
+}
+.mobile-nav-icon > svg {
+  transition: transform var(--duration-fast) var(--ease-enter);
 }
 .mobile-nav-label {
   font-size: 12px;
@@ -480,7 +482,7 @@
   outline-offset: 1px;
   background: var(--secondary);
 }
-.mobile-nav-item:active .mobile-nav-icon {
+.mobile-nav-item:active .mobile-nav-icon > svg {
   transform: scale(0.92);
 }
 @media (hover: hover) {
