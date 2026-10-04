@@ -3,10 +3,8 @@ import {
   Scripts,
   createRootRouteWithContext,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
-
-import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import { DemoProvider } from '#/components/fintech/shared'
+import { TooltipProvider } from '#/components/ui/tooltip'
 
 import { getLocale } from '#/paraglide/runtime'
 
@@ -39,13 +37,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
       {
         name: 'viewport',
-        content: 'width=device-width, initial-scale=1',
+        content: 'width=device-width, initial-scale=1, viewport-fit=cover',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Setlr — Your money, moving with you',
       },
     ],
     links: [
+      { rel: 'icon', type: 'image/svg+xml', href: '/brand/setlr-mark.svg' },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -62,19 +61,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
-        <TanStackDevtools
-          config={{
-            position: 'bottom-right',
-          }}
-          plugins={[
-            {
-              name: 'Tanstack Router',
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-            TanStackQueryDevtools,
-          ]}
-        />
+        <TooltipProvider>
+          <DemoProvider>{children}</DemoProvider>
+        </TooltipProvider>
         <Scripts />
       </body>
     </html>
