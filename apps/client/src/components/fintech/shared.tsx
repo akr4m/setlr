@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import {
   ArrowDownLeft,
   ArrowRight,
@@ -41,6 +41,7 @@ import {
 import { Switch } from '#/components/ui/switch'
 import { cn } from '#/lib/utils'
 import { downloadReceipt } from '#/lib/demo-export'
+import { prefersReducedMotion, routeViewTransition } from '#/lib/motion'
 import {
   initialGoals,
   initialNotices,
@@ -65,6 +66,8 @@ export type FormField = {
 type DemoContextType = {
   dark: boolean
   setDark: (value: boolean) => void
+  reducedMotion: boolean
+  setReducedMotion: (value: boolean) => void
   walletBalances: { BDT: number; CNY: number; USD: number }
   businessBalance: number
   updateBalance: (delta: number, business?: boolean) => void
@@ -96,10 +99,14 @@ export function useDemo() {
   return context
 }
 export function DemoProvider({ children }: { children: ReactNode }) {
+  const router = useRouter()
   const [dark, setDark] = useState(
     () => localStorage.getItem('setlr-theme') === 'dark',
   )
   const [hidden, setHidden] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(
+    () => localStorage.getItem('setlr-reduced-motion') === 'true',
+  )
   const [walletBalances, setWalletBalances] = useState({
     BDT: 96420,
     CNY: 1280,
@@ -107,9 +114,11 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   })
   const [businessBalance, setBusinessBalance] = useState(842350)
   const [message, setMessage] = useState('')
+  const [toastOpen, setToastOpen] = useState(false)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [activity, setActivity] = useState(transactions)
   const [selected, setSelected] = useState<Transaction | null>(null)
+  const [selectedOpen, setSelectedOpen] = useState(false)
   const [contacts, setContacts] = useState(recipients)
   const [goals, setGoals] = useState(initialGoals)
   const [notices, setNotices] = useState(initialNotices)
@@ -119,15 +128,31 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     fields: FormField[]
     onSave?: (values: Record<string, string>) => void
   } | null>(null)
+  const [formOpen, setFormOpen] = useState(false)
   const [confirmation, setConfirmation] = useState<{
     title: string
     description: string
     onConfirm: () => void
   } | null>(null)
+  const [confirmationOpen, setConfirmationOpen] = useState(false)
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
     localStorage.setItem('setlr-theme', dark ? 'dark' : 'light')
   }, [dark])
+  useEffect(() => {
+    document.documentElement.dataset.motion = reducedMotion ? 'reduced' : 'full'
+    localStorage.setItem('setlr-reduced-motion', String(reducedMotion))
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () =>
+      router.update({
+        defaultViewTransition: prefersReducedMotion()
+          ? false
+          : routeViewTransition,
+      })
+    update()
+    preference.addEventListener('change', update)
+    return () => preference.removeEventListener('change', update)
+  }, [reducedMotion, router])
   useEffect(
     () => () => {
       if (toastTimer.current) clearTimeout(toastTimer.current)
@@ -136,14 +161,17 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   )
   function toast(text: string) {
     setMessage(text)
+    setToastOpen(true)
     if (toastTimer.current) clearTimeout(toastTimer.current)
-    toastTimer.current = setTimeout(() => setMessage(''), 4500)
+    toastTimer.current = setTimeout(() => setToastOpen(false), 4500)
   }
   return (
     <DemoContext.Provider
       value={{
         dark,
         setDark,
+        reducedMotion,
+        setReducedMotion,
         walletBalances,
         businessBalance,
         updateBalance: (delta, business = false) =>
@@ -156,23 +184,31 @@ export function DemoProvider({ children }: { children: ReactNode }) {
         activity,
         addTransaction: (t) => setActivity((all) => [t, ...all]),
         selected,
-        setSelected,
+        setSelected: (transaction) => {
+          if (transaction) setSelected(transaction)
+          setSelectedOpen(Boolean(transaction))
+        },
         contacts,
         setContacts,
         goals,
         setGoals,
         notices,
         setNotices,
-        openForm: (title, description, fields, onSave) =>
-          setForm({ title, description, fields, onSave }),
-        confirm: (title, description, onConfirm) =>
-          setConfirmation({ title, description, onConfirm }),
+        openForm: (title, description, fields, onSave) => {
+          setForm({ title, description, fields, onSave })
+          setFormOpen(true)
+        },
+        confirm: (title, description, onConfirm) => {
+          setConfirmation({ title, description, onConfirm })
+          setConfirmationOpen(true)
+        },
       }}
     >
       {children}
       <Dialog
-        open={!!form}
-        onOpenChange={(open) => {
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onOpenChangeComplete={(open) => {
           if (!open) setForm(null)
         }}
       >
@@ -185,14 +221,15 @@ export function DemoProvider({ children }: { children: ReactNode }) {
             <FormPreview
               key={form.title}
               form={form}
-              close={() => setForm(null)}
+              close={() => setFormOpen(false)}
             />
           )}
         </DialogContent>
       </Dialog>
       <Dialog
-        open={!!confirmation}
-        onOpenChange={(open) => {
+        open={confirmationOpen}
+        onOpenChange={setConfirmationOpen}
+        onOpenChangeComplete={(open) => {
           if (!open) setConfirmation(null)
         }}
       >
@@ -202,14 +239,17 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           </DialogTitle>
           <DialogDescription>{confirmation?.description}</DialogDescription>
           <div className="mt-3 flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setConfirmation(null)}>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmationOpen(false)}
+            >
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={() => {
                 confirmation?.onConfirm()
-                setConfirmation(null)
+                setConfirmationOpen(false)
               }}
             >
               Confirm
@@ -217,23 +257,28 @@ export function DemoProvider({ children }: { children: ReactNode }) {
           </div>
         </DialogContent>
       </Dialog>
-      <TransactionDetails />
-      {message && (
-        <div
-          role="status"
-          className="fixed right-4 bottom-24 z-50 flex max-w-[calc(100%-32px)] items-center gap-3 rounded-xl border bg-card px-5 py-4 shadow-lg lg:bottom-6"
+      <TransactionDetails
+        open={selectedOpen}
+        onOpenChange={setSelectedOpen}
+        onCloseComplete={() => setSelected(null)}
+      />
+      <div
+        role="status"
+        data-open={toastOpen}
+        aria-hidden={!toastOpen}
+        inert={!toastOpen}
+        className="demo-toast fixed right-4 z-50 flex max-w-[calc(100%-32px)] items-center gap-3 rounded-xl border bg-card px-5 py-4 shadow-lg"
+      >
+        <CheckCircle2 className="size-5 shrink-0 text-success" />
+        <span className="text-sm">{message}</span>
+        <button
+          aria-label="Dismiss notification"
+          onClick={() => setToastOpen(false)}
+          className="ml-2 p-2"
         >
-          <CheckCircle2 className="size-5 shrink-0 text-success" />
-          <span className="text-sm">{message}</span>
-          <button
-            aria-label="Dismiss notification"
-            onClick={() => setMessage('')}
-            className="ml-2 p-2"
-          >
-            <X className="size-4" />
-          </button>
-        </div>
-      )}
+          <X className="size-4" />
+        </button>
+      </div>
     </DemoContext.Provider>
   )
 }
@@ -260,6 +305,7 @@ export function AppLink({
         onClick={onClick}
         aria-label={label}
         aria-current={ariaCurrent}
+        activeProps={{ className: '' }}
       />
     ) : (
       <Link
@@ -269,6 +315,7 @@ export function AppLink({
         onClick={onClick}
         aria-label={label}
         aria-current={ariaCurrent}
+        activeProps={{ className: '' }}
       />
     )
   if (isValidElement(children) && children.type === Button) {
@@ -517,7 +564,9 @@ export function Progress({
     >
       <div
         className="progress-fill"
-        style={{ width: `${Math.min(value, 100)}%` }}
+        style={{
+          transform: `scaleX(${Math.max(0, Math.min(value, 100)) / 100})`,
+        }}
       />
     </div>
   )
@@ -847,13 +896,22 @@ export function TransactionTable({
     />
   )
 }
-function TransactionDetails() {
+function TransactionDetails({
+  open,
+  onOpenChange,
+  onCloseComplete,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onCloseComplete: () => void
+}) {
   const { selected: t, setSelected, toast, openForm } = useDemo()
   return (
     <Dialog
-      open={!!t}
-      onOpenChange={(open) => {
-        if (!open) setSelected(null)
+      open={open}
+      onOpenChange={onOpenChange}
+      onOpenChangeComplete={(isOpen) => {
+        if (!isOpen) onCloseComplete()
       }}
     >
       <DialogContent className="sm:max-w-lg">

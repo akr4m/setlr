@@ -12,7 +12,9 @@ The overlapping circles and wordmark in `public/brand/` were extracted from the 
 | Brand yellow         | `#ffcf00`         | Highlights and savings accents                      |
 | Soft blue            | `#6d68ae`         | Supporting brand color and focus ring               |
 | Base radius          | `0.75rem`         | Cards, inputs, dialogs, and controls                |
-| Fast / normal motion | `160ms` / `240ms` | Feedback and page transitions                       |
+| Fast / normal motion | `160ms` / `240ms` | Controls and local surface feedback                 |
+| Route / panel motion | `320ms` / `360ms` | Page transitions and drawer entrances               |
+| Exit motion          | `180ms`           | Dialog and page dismissal                           |
 
 `src/styles.css` defines brand primitives, semantic CSS variables, and Tailwind aliases. Components use `bg-card`, `text-muted-foreground`, `text-primary`, `text-success`, `bg-warning-soft`, and related semantic classes. Light and dark themes keep the same roles with different surface and foreground values. Avoid introducing feature-specific color constants.
 
@@ -25,7 +27,7 @@ The overlapping circles and wordmark in `public/brand/` were extracted from the 
 - A 4px spacing rhythm: controls and rows use 8–16px; cards use 20–32px; page sections use 20–28px.
 - Desktop: 224px sidebar, 72px header, bounded content width, split primary/secondary columns.
 - Below 1024px: compact header, drawer navigation, five-item bottom navigation. Grids collapse to one column before their contents become cramped.
-- Mobile navigation uses a 76px floating dock, inset 12px plus the bottom safe area, with a 520px maximum width. Blue icon capsules identify the active section; More includes every secondary destination. Press and selection feedback use the shared motion tokens, with reduced-motion support. Content reserves the dock height plus 24px of scroll clearance.
+- Mobile navigation uses a 76px floating dock, inset 12px plus the bottom safe area, with a 520px maximum width. A blue capsule moves between active sections; More includes every secondary destination. Press and selection feedback use the shared motion tokens, with reduced-motion support. Content reserves the dock height plus 24px of scroll clearance.
 - Phone home prioritizes balance, five quick actions, and activity. Transaction lists show date and status in tappable rows.
 - Mobile form text is 16px. Header controls are at least 44px, and content spacing accounts for safe areas. Payment flows use a focused view with totals next to the primary action.
 - Navigation uses a Base UI modal drawer with keyboard focus management. Dialogs become bottom sheets on small screens. Mobile action buttons have a minimum 44px height. Reduced motion is respected.
@@ -44,6 +46,15 @@ The overlapping circles and wordmark in `public/brand/` were extracted from the 
 | `src/lib/demo-export.ts`              | Browser-generated PDF receipts and statements                                                                                                     |
 
 Use `AppLink` for internal navigation. It composes a Base UI Button through its `render` prop when needed, preserving one interactive element. Use `Field` to associate a visible label with its input, and `DigitInput` for accessible OTP/PIN entry. Base UI handles dialog focus and keyboard interaction.
+
+## Motion and continuity
+
+- The root route owns the persistent workspace shell. Child routes render page content through its Outlet, so the sidebar, header, and dock survive navigation. Active indicators move with CSS transforms and ResizeObserver measurements; navigation text stays crisp.
+- `src/lib/motion.ts` configures [TanStack Router View Transitions](https://tanstack.com/router/latest/docs/framework/react/examples/view-transitions). Forward and back navigation crossfade content with an 8px movement. Payment steps use the same snapshot mechanism, with the reverse direction when returning to edit or review.
+- `src/motion.css` styles route snapshots, live navigation indicators, dialogs, bottom sheets, tooltips, tabs, buttons, switches, progress, and toast entry/exit. Timing, easing, distance, and scale values come from `src/styles.css`. Large content surfaces use transform and opacity rather than animating layout dimensions.
+- Drawers and dialogs use [Base UI starting and ending styles](https://base-ui.com/react/handbook/animation), allowing an interrupted transition to reverse smoothly. Dialog payloads remain available until dismissal finishes. Keyboard focus, Escape dismissal, and scroll locking stay under Base UI control.
+- Browsers without View Transitions use CSS content entrances and the same live navigation indicators. No animation library or additional runtime dependency is required.
+- The saved Reduce animations preference and `prefers-reduced-motion` disable spatial motion and native route snapshots. The app preference persists in localStorage, applies to every shared control, and never overrides the OS preference.
 
 ## Flow and state conventions
 

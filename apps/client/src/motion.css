@@ -1,0 +1,354 @@
+/* Shared motion: snapshots for navigation, reversible transitions for controls. */
+html {
+  view-transition-name: none;
+}
+.workspace-content {
+  view-transition-name: page-content;
+}
+.auth-workspace {
+  view-transition-name: auth-content;
+}
+.payment-stage {
+  view-transition-name: payment-step;
+}
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(*) {
+  animation-duration: var(--duration-route);
+  animation-timing-function: var(--ease-enter);
+}
+::view-transition-group(page-content),
+::view-transition-group(auth-content),
+::view-transition-group(payment-step) {
+  animation: none;
+}
+::view-transition-old(page-content),
+::view-transition-old(auth-content),
+::view-transition-old(payment-step) {
+  animation: content-leave var(--duration-exit) var(--ease-standard) both;
+}
+::view-transition-new(page-content),
+::view-transition-new(auth-content),
+::view-transition-new(payment-step) {
+  animation: content-enter var(--duration-route) var(--ease-enter) both;
+}
+:root:active-view-transition-type(backward),
+:root:active-view-transition-type(step-backward) {
+  --motion-distance: -8px;
+}
+:root:active-view-transition-type(step-forward)::view-transition-old(
+    page-content
+  ),
+:root:active-view-transition-type(step-forward)::view-transition-new(
+    page-content
+  ),
+:root:active-view-transition-type(step-backward)::view-transition-old(
+    page-content
+  ),
+:root:active-view-transition-type(step-backward)::view-transition-new(
+    page-content
+  ) {
+  animation: none;
+}
+.page-enter {
+  animation: content-enter var(--duration-route) var(--ease-enter) both;
+}
+:root[data-view-transitions='supported'] .page-enter {
+  animation: none;
+}
+.payment-stage > div {
+  animation: content-enter var(--duration-normal) var(--ease-enter) both;
+}
+:root[data-view-transitions='supported'] .payment-stage > div,
+:root:active-view-transition [data-slot='tabs-content'] {
+  animation: none;
+}
+@keyframes content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-distance));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes content-leave {
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-distance) * -1));
+  }
+}
+
+/* Live indicators keep their labels crisp while page snapshots crossfade. */
+.nav-item {
+  position: relative;
+  isolation: isolate;
+}
+.nav-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: background-color var(--duration-normal) var(--ease-standard);
+}
+.nav-item.active {
+  background: transparent;
+}
+.nav-item.active::before {
+  background: var(--secondary);
+}
+.sidebar-nav .nav-item.active::before {
+  background: transparent;
+}
+.mobile-nav-item.is-active .mobile-nav-icon {
+  background: transparent;
+}
+.mobile-nav-icon {
+  transition-timing-function: var(--ease-enter);
+}
+.sidebar-indicator,
+.mobile-indicator {
+  z-index: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition:
+    transform var(--duration-route) var(--ease-enter),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+.mobile-nav-item {
+  position: relative;
+  z-index: 1;
+}
+.mobile-nav-item.is-active {
+  background: transparent;
+}
+.sidebar-indicator {
+  border-radius: var(--radius-sm);
+  background: var(--secondary);
+}
+.mobile-indicator {
+  border-radius: 12px;
+  background: var(--primary);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+.nav-item > svg,
+.quick-action .icon-tile {
+  transition: transform var(--duration-fast) var(--ease-enter);
+}
+@media (hover: hover) {
+  .nav-item:hover > svg {
+    transform: translateX(2px);
+  }
+  .quick-action:hover .icon-tile {
+    transform: translateY(-2px);
+  }
+}
+[data-slot='button'],
+[data-slot='switch'] {
+  transition-property:
+    background-color, border-color, color, box-shadow, opacity, translate,
+    transform;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-standard);
+}
+[data-slot='button']:not([aria-haspopup]):active {
+  transform: scale(var(--motion-press-scale));
+}
+[data-slot='switch-thumb'] {
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-enter);
+}
+.progress-fill {
+  width: 100%;
+  transform-origin: left;
+  transition: transform var(--duration-panel) var(--ease-enter);
+}
+.bank-card {
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+/* Base UI keeps surfaces mounted until these transitions finish. */
+[data-slot='dialog-overlay'] {
+  opacity: 1;
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+[data-slot='dialog-overlay'][data-starting-style],
+[data-slot='dialog-overlay'][data-ending-style] {
+  opacity: 0;
+}
+[data-slot='dialog-overlay'][data-ending-style] {
+  transition-duration: var(--duration-exit);
+}
+[data-slot='dialog-content'] {
+  --dialog-y: 0px;
+  --dialog-scale: 1;
+  translate: -50% -50%;
+  opacity: 1;
+  transform: translateY(var(--dialog-y)) scale(var(--dialog-scale));
+  transition:
+    transform var(--duration-normal) var(--ease-enter),
+    opacity var(--duration-normal) var(--ease-enter);
+}
+[data-slot='dialog-content'][data-starting-style],
+[data-slot='dialog-content'][data-ending-style] {
+  --dialog-y: var(--motion-distance);
+  --dialog-scale: var(--motion-scale);
+  opacity: 0;
+}
+[data-slot='dialog-content'][data-ending-style] {
+  transition-duration: var(--duration-exit);
+  transition-timing-function: var(--ease-exit);
+}
+@media (max-width: 639px) {
+  [data-slot='dialog-content'] {
+    translate: none;
+    transition-duration: var(--duration-panel);
+  }
+  [data-slot='dialog-content'][data-starting-style],
+  [data-slot='dialog-content'][data-ending-style] {
+    --dialog-y: 100%;
+    --dialog-scale: 1;
+    opacity: 1;
+  }
+  [data-slot='dialog-content'][data-ending-style] {
+    transition-duration: var(--duration-normal);
+  }
+}
+[data-slot='dialog-content'].navigation-drawer {
+  --drawer-x: 0%;
+  translate: none;
+  transform: translateX(var(--drawer-x));
+  transition: transform var(--duration-panel) var(--ease-enter);
+}
+[data-slot='dialog-content'].navigation-drawer[data-starting-style],
+[data-slot='dialog-content'].navigation-drawer[data-ending-style] {
+  --drawer-x: -100%;
+  opacity: 1;
+}
+[data-slot='dialog-content'].navigation-drawer[data-ending-style] {
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-exit);
+}
+[data-slot='tooltip-content'] {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--duration-fast) var(--ease-enter),
+    transform var(--duration-fast) var(--ease-enter);
+}
+[data-slot='tooltip-content'][data-starting-style],
+[data-slot='tooltip-content'][data-ending-style] {
+  opacity: 0;
+  transform: scale(var(--motion-scale));
+}
+[data-slot='tabs-indicator'] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: var(--active-tab-width);
+  height: var(--active-tab-height);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  box-shadow: var(--shadow-card);
+  transform: translate(var(--active-tab-left), var(--active-tab-top));
+  transition: transform var(--duration-normal) var(--ease-enter);
+  pointer-events: none;
+}
+[data-slot='tabs-list'][data-variant='default'] > [data-slot='tabs-trigger'] {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+[data-slot='tabs-content']:not([hidden]) {
+  animation: content-enter var(--duration-normal) var(--ease-enter) both;
+}
+.demo-toast {
+  bottom: calc(
+    var(--mobile-nav-height) + var(--mobile-nav-inset) + 12px +
+      env(safe-area-inset-bottom, 0px)
+  );
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(var(--motion-distance));
+  pointer-events: none;
+  transition:
+    opacity var(--duration-exit) var(--ease-exit),
+    transform var(--duration-exit) var(--ease-exit),
+    visibility 0s var(--duration-exit);
+}
+.demo-toast[data-open='true'] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+  transition:
+    opacity var(--duration-normal) var(--ease-enter),
+    transform var(--duration-normal) var(--ease-enter),
+    visibility 0s;
+}
+@media (min-width: 1024px) {
+  .demo-toast {
+    bottom: 24px;
+  }
+}
+
+/* Both the OS preference and the saved app preference disable spatial motion. */
+:root[data-motion='reduced'] {
+  --duration-fast: 0ms;
+  --duration-normal: 0ms;
+  --duration-route: 0ms;
+  --duration-panel: 0ms;
+  --duration-exit: 0ms;
+  --motion-distance: 0px;
+  --motion-scale: 1;
+  --motion-press-scale: 1;
+}
+:root[data-motion='reduced'] *,
+:root[data-motion='reduced'] *::before,
+:root[data-motion='reduced'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0ms !important;
+  scroll-behavior: auto !important;
+}
+:root[data-motion='reduced'] .nav-item:hover > svg,
+:root[data-motion='reduced'] .quick-action:hover .icon-tile,
+:root[data-motion='reduced'] .mobile-nav-item:active .mobile-nav-icon {
+  transform: none;
+}
+:root[data-motion='reduced'] [data-slot='button']:active {
+  translate: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-route: 0ms;
+    --duration-panel: 0ms;
+    --duration-exit: 0ms;
+    --motion-distance: 0px;
+    --motion-scale: 1;
+    --motion-press-scale: 1;
+  }
+  .nav-item:hover > svg,
+  .quick-action:hover .icon-tile,
+  .mobile-nav-item:active .mobile-nav-icon {
+    transform: none;
+  }
+  [data-slot='button']:active {
+    translate: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

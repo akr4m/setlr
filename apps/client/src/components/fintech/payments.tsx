@@ -44,6 +44,7 @@ import {
 import { money, paymentModes } from './data'
 import { cn } from '#/lib/utils'
 import { downloadReceipt } from '#/lib/demo-export'
+import { transitionStep } from '#/lib/motion'
 
 const actions = [
   {
@@ -246,7 +247,10 @@ export function PaymentFlow({ mode }: { mode: string }) {
     businessBalance,
     updateBalance,
   } = useDemo()
-  const [stage, setStage] = useState(0)
+  const [stage, setStageState] = useState(0)
+  function setStage(next: number) {
+    transitionStep(() => setStageState(next), next < stage)
+  }
   const [recipient, setRecipient] = useState(
     mode === 'add-money' || mode === 'withdraw-money'
       ? 'Eastern Bank PLC •• 4821'
@@ -424,7 +428,7 @@ export function PaymentFlow({ mode }: { mode: string }) {
               </div>
             ))}
           </div>
-          <div className="p-5 sm:p-8">
+          <div className="payment-stage p-5 sm:p-8">
             {stage === 0 && (
               <div className="space-y-5">
                 {mode === 'qr-payment' && (

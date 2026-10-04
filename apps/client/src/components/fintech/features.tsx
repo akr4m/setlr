@@ -2097,7 +2097,8 @@ function SecurityPage() {
   )
 }
 function SettingsPage() {
-  const { dark, setDark, toast, confirm } = useDemo()
+  const { dark, setDark, reducedMotion, setReducedMotion, toast, confirm } =
+    useDemo()
   return (
     <div className="page-enter">
       <Heading page="settings" />
@@ -2159,13 +2160,8 @@ function SettingsPage() {
               <ToggleRow
                 title="Reduce animations"
                 description="Your system motion preference is always respected"
-                initial={false}
-                onChange={(value) => {
-                  document.documentElement.style.setProperty(
-                    '--duration-normal',
-                    value ? '0ms' : '240ms',
-                  )
-                }}
+                initial={reducedMotion}
+                onChange={setReducedMotion}
               />
             </div>
           </Panel>

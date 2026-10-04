@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { useRouterState } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import {
   ArrowRight,
   Bell,
@@ -26,10 +28,24 @@ import { PaymentFlow, Payments, ReceiveMoney } from './payments'
 import { FeaturePage } from './features'
 import { AuthPage, authPages } from './auth'
 import { cn } from '#/lib/utils'
+import { NavigationIndicator } from './navigation-indicator'
 
 const mobileNav = ['dashboard', 'wallet', 'payments', 'cards']
 
-export function FintechApp({ page = 'dashboard' }: { page?: string }) {
+export function FintechPage({ page = 'dashboard' }: { page?: string }) {
+  if (authPages.includes(page)) return <AuthPage page={page} />
+  if (page === 'dashboard') return <Dashboard />
+  if (paymentModes[page]) return <PaymentFlow mode={page} />
+  if (page === 'payments') return <Payments />
+  if (page === 'receive-money') return <ReceiveMoney />
+  return <FeaturePage page={page} />
+}
+
+export function FintechApp({ children }: { children: ReactNode }) {
+  const page = useRouterState({
+    select: (state) =>
+      state.matches.at(-1)?.pathname.replace(/^\/|\/$/g, '') || 'dashboard',
+  })
   const [menu, setMenu] = useState(false)
   const [more, setMore] = useState(false)
   const [search, setSearch] = useState(false)
@@ -64,7 +80,9 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
         ? 'cards'
         : page
   const mobileActive = mobileNav.includes(active) ? active : 'more'
-  if (authPages.includes(page)) return <AuthPage page={page} />
+  const mobileSelected = more ? 'more' : mobileActive
+  if (authPages.includes(page))
+    return <div className="auth-workspace">{children}</div>
   const info = pageInfo[active] || pageInfo.dashboard!
   const navLink = (key: string) => {
     const item = pageInfo[key]!
@@ -114,9 +132,14 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
         <ChevronDown className="size-3.5 text-muted-foreground" />
       </button>
       <nav
-        className="flex-1 overflow-y-auto px-3 pb-4"
+        className="sidebar-nav relative isolate flex-1 overflow-y-auto px-3 pb-4"
         aria-label="Main navigation"
       >
+        <NavigationIndicator
+          active={active}
+          selector=".nav-item.active"
+          className="sidebar-indicator"
+        />
         <p className="eyebrow mb-2 px-3">Workspace</p>
         <div className="space-y-1">{mainNav.map(navLink)}</div>
         <p className="eyebrow mt-7 mb-2 px-3">Plan & grow</p>
@@ -201,7 +224,7 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
       <aside
         inert={mobile}
         aria-hidden={mobile ? true : undefined}
-        className="fixed inset-y-0 left-0 z-40 hidden w-[224px] flex-col border-r bg-card lg:flex"
+        className="workspace-sidebar fixed inset-y-0 left-0 z-40 hidden w-[224px] flex-col border-r bg-card lg:flex"
       >
         {navigation}
       </aside>
@@ -285,17 +308,7 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
             paymentModes[page] && 'payment-workspace',
           )}
         >
-          {page === 'dashboard' ? (
-            <Dashboard />
-          ) : paymentModes[page] ? (
-            <PaymentFlow key={page} mode={page} />
-          ) : page === 'payments' ? (
-            <Payments />
-          ) : page === 'receive-money' ? (
-            <ReceiveMoney />
-          ) : (
-            <FeaturePage key={page} page={page} />
-          )}
+          {children}
         </main>
       </div>
       {!paymentModes[page] && (
@@ -303,15 +316,24 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
           aria-label="Mobile navigation"
           className="mobile-bottom-nav fixed z-20 grid grid-cols-5 lg:hidden"
         >
+          <NavigationIndicator
+            active={mobileSelected}
+            selector=".mobile-nav-item.is-active .mobile-nav-icon"
+            className="mobile-indicator"
+          />
           {mobileNav.map((key) => {
             const item = pageInfo[key]!
-            const selected = mobileActive === key
+            const selected = mobileSelected === key
             return (
               <AppLink
                 page={key}
                 key={key}
                 ariaCurrent={
-                  selected ? (page === key ? 'page' : 'location') : undefined
+                  mobileActive === key
+                    ? page === key
+                      ? 'page'
+                      : 'location'
+                    : undefined
                 }
                 className={cn('mobile-nav-item', selected && 'is-active')}
               >
@@ -339,13 +361,13 @@ export function FintechApp({ page = 'dashboard' }: { page?: string }) {
             aria-current={mobileActive === 'more' ? 'location' : undefined}
             className={cn(
               'mobile-nav-item',
-              (mobileActive === 'more' || more) && 'is-active',
+              mobileSelected === 'more' && 'is-active',
             )}
           >
             <span className="mobile-nav-icon">
               <MoreHorizontal
                 className="size-[22px]"
-                strokeWidth={mobileActive === 'more' || more ? 2 : 1.8}
+                strokeWidth={mobileSelected === 'more' ? 2 : 1.8}
               />
             </span>
             <span className="mobile-nav-label">More</span>

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { pageInfo, paymentModes } from '#/components/fintech/data'
-import { FintechApp } from '#/components/fintech/app'
+import { FintechPage } from '#/components/fintech/app'
 
 export const Route = createFileRoute('/$page')({
   component: Page,
@@ -15,5 +15,5 @@ export const Route = createFileRoute('/$page')({
 
 function Page() {
   const { page } = Route.useParams()
-  return <FintechApp key={page} page={page} />
+  return <FintechPage key={page} page={page} />
 }

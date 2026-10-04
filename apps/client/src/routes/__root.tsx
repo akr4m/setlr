@@ -1,6 +1,7 @@
 import { HeadContent, Outlet, createRootRoute } from '@tanstack/react-router'
 import { DemoProvider } from '#/components/fintech/shared'
 import { TooltipProvider } from '#/components/ui/tooltip'
+import { FintechApp } from '#/components/fintech/app'
 
 import { getLocale } from '#/paraglide/runtime'
 
@@ -21,7 +22,9 @@ function RootLayout() {
       <HeadContent />
       <TooltipProvider>
         <DemoProvider>
-          <Outlet />
+          <FintechApp>
+            <Outlet />
+          </FintechApp>
         </DemoProvider>
       </TooltipProvider>
     </>

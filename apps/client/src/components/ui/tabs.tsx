@@ -41,15 +41,25 @@ const tabsListVariants = cva(
 function TabsList({
   className,
   variant = 'default',
+  children,
   ...props
 }: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      className={cn(
+        'relative isolate',
+        tabsListVariants({ variant }),
+        className,
+      )}
       {...props}
-    />
+    >
+      {children}
+      {variant === 'default' && (
+        <TabsPrimitive.Indicator data-slot="tabs-indicator" />
+      )}
+    </TabsPrimitive.List>
   )
 }
 
