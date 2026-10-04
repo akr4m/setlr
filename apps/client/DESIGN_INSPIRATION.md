@@ -1,6 +1,6 @@
 # FinTech design inspiration and mobile refinement
 
-Researched **“fintech ui ux design”** on Google Images, Dribbble, Pinterest, and related portfolio results. The references inform hierarchy and interaction patterns; Setlr's existing `art/` assets remain the source of truth for colors, identity, and typography. No third-party artwork was added to the product.
+Researched **“fintech ui ux design”** on Google Images, Dribbble, Pinterest, and related portfolio results. The references inform hierarchy and interaction patterns; Setlr's existing `art/` assets remain the source of truth for colors, identity, and the wordmark. Interface typography uses Manrope and IBM Plex Sans as defined in [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md). No third-party artwork was added to the product.
 
 ## Selected references
 

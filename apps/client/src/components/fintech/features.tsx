@@ -1000,7 +1000,7 @@ function InvestmentsPage() {
       </Heading>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.7fr_1fr]">
         <Panel className="p-6">
-          <div className="flex justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="muted">Portfolio value</p>
               <p className="money mt-2 text-4xl font-semibold">
@@ -1495,7 +1495,10 @@ function LoansPage() {
             ['07 November 2026', 'Upcoming'],
             ['07 December 2026', 'Upcoming'],
           ].map(([date, status]) => (
-            <div className="data-row" key={date}>
+            <div
+              className="data-row flex-col items-stretch gap-3 sm:flex-row sm:items-center"
+              key={date}
+            >
               <div>
                 <p className="font-semibold">{date}</p>
                 <p className="muted">{status}</p>
@@ -3541,13 +3544,15 @@ function DesignSystemPage() {
         </Panel>
         <Panel title="Typography & spacing">
           <div className="space-y-4 p-6">
-            <p className="text-3xl font-semibold tracking-tight">
-              Source Sans 3
+            <p className="font-display text-3xl font-semibold tracking-tight">
+              Manrope
             </p>
             <p className="text-xl font-semibold">
               Clear hierarchy. Familiar rhythm.
             </p>
-            <p className="text-[15px]">Body copy · 15px / 22px · Regular</p>
+            <p className="text-[15px]">
+              IBM Plex Sans · Body copy · 15px / 22px · Regular
+            </p>
             <p className="text-sm text-muted-foreground">
               Supporting text · 14px · Semantic muted foreground
             </p>

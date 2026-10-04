@@ -1,4 +1,6 @@
 @import '@fontsource-variable/source-sans-3';
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource-variable/manrope';
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @custom-variant dark (&:is(.dark *));
@@ -65,7 +67,9 @@
   --chart-2: #5d587e;
 }
 @theme inline {
-  --font-sans: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Manrope Variable', var(--font-sans);
+  --font-brand: 'Source Sans 3 Variable', var(--font-sans);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -138,6 +142,11 @@
   p {
     margin: 0;
   }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
   input,
   select,
   textarea {
@@ -169,7 +178,8 @@
     @apply text-sm text-muted-foreground;
   }
   .money {
-    font-variant-numeric: tabular-nums;
+    font-family: var(--font-sans);
+    font-variant-numeric: lining-nums tabular-nums;
     letter-spacing: -0.025em;
   }
   .field {
@@ -352,9 +362,6 @@
 [data-slot='switch-thumb'] {
   height: 20px;
   width: 20px;
-}
-[data-slot='switch-thumb'][data-checked] {
-  transform: translateX(16px);
 }
 .bank-card {
   width: 100%;

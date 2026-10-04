@@ -4,7 +4,7 @@ This is a frontend design prototype. The default workspace is a personal wallet;
 
 ## Brand foundation
 
-The overlapping circles and wordmark in `public/brand/` were extracted from the original vector artwork in `art/Setlr.ai`. Source Sans 3 Variable is bundled locally, matching the Source Sans family identified in the artwork.
+The overlapping circles and wordmark in `public/brand/` were extracted from the original vector artwork in `art/Setlr.ai`. The wordmark keeps its original Source Sans family. The application uses locally bundled Manrope and IBM Plex Sans variable fonts for its interface typography.
 
 | Primitive            | Value             | Usage                                               |
 | -------------------- | ----------------- | --------------------------------------------------- |
@@ -18,8 +18,10 @@ The overlapping circles and wordmark in `public/brand/` were extracted from the 
 
 ## Layout and typography
 
-- Source Sans 3 Variable throughout; body text 15px, supporting text 12–14px, page titles about 30px, key balances 32–38px.
-- Tabular numerals on money. Currency codes accompany cross-border values and exports.
+- **Manrope** for headings (`font-display`): a modern geometric shape for page titles and section headings, usually weight 600–700.
+- **IBM Plex Sans** for body text, navigation, forms, and financial figures (`font-sans`): regular 400 for reading, medium 500 for controls, semibold 600 for emphasis. Body text 15px, supporting text 12–14px, page titles about 30px, key balances 32–38px.
+- The Source Sans 3 family is limited to the Setlr wordmark (`font-brand`), preserving the supplied branding.
+- Fonts are self-hosted through Fontsource with `font-display: swap`. The shared `.money` class uses Plex Sans with lining, tabular numerals. Currency codes accompany cross-border values and exports.
 - A 4px spacing rhythm: controls and rows use 8–16px; cards use 20–32px; page sections use 20–28px.
 - Desktop: 224px sidebar, 72px header, bounded content width, split primary/secondary columns.
 - Below 1024px: compact header, drawer navigation, five-item bottom navigation. Grids collapse to one column before their contents become cramped.

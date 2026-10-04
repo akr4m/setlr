@@ -96,7 +96,9 @@ export function useDemo() {
   return context
 }
 export function DemoProvider({ children }: { children: ReactNode }) {
-  const [dark, setDark] = useState(false)
+  const [dark, setDark] = useState(
+    () => localStorage.getItem('setlr-theme') === 'dark',
+  )
   const [hidden, setHidden] = useState(false)
   const [walletBalances, setWalletBalances] = useState({
     BDT: 96420,
@@ -122,9 +124,6 @@ export function DemoProvider({ children }: { children: ReactNode }) {
     description: string
     onConfirm: () => void
   } | null>(null)
-  useEffect(() => {
-    setDark(localStorage.getItem('setlr-theme') === 'dark')
-  }, [])
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
     localStorage.setItem('setlr-theme', dark ? 'dark' : 'light')
@@ -291,7 +290,7 @@ export function Brand({
       {!compact && (
         <span
           className={cn(
-            'text-[31px] leading-none font-black tracking-[-1.2px]',
+            'font-brand text-[31px] leading-none font-black tracking-[-1.2px]',
             light ? 'text-white' : 'text-foreground',
           )}
         >
